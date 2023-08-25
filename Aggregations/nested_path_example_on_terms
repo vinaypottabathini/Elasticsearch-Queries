@@ -1,0 +1,125 @@
+/*
+
+ group the results by a specific field, returning top n documents per group. The document have a nested filed and I want to aggregate all the documents' nested field for each group.
+ I have 5 documents and each have a groupId and also a nested field peoples. I want group these documents by the groupId. And then for each group, I want to get top 2 people(some documents may contain same people)
+ 
+ */
+ 
+
+
+
+PUT test
+
+PUT test/_mapping
+{
+  "properties": {
+      "groupId":{
+        "type":"keyword"
+      },
+      "id":{
+        "type":"keyword"
+      },
+      "name":{
+        "type":"text"
+      },
+      "people":{
+        "type":"nested",
+        "properties":{
+          "email":{
+            "type":"keyword"
+          }
+        }
+      }
+    }
+}
+
+PUT test/_doc/1
+{
+  "name": "docs1",
+  "groupId": "1",
+  "people":[{
+    "email":"people1@test.com"
+  }]
+}
+
+PUT test/_doc/2
+{
+  "name": "docs2",
+  "groupId": "1",
+  "people":[{
+    "email":"people2.1@test.com"
+  },
+  {
+    "email":"people2.2@test.com"
+  }]
+}
+
+PUT test/_doc/3
+{
+  "name": "docs3",
+  "groupId": "2",
+  "people":[{
+    "email":"people3.1@test.com"
+  },
+  {
+    "email":"people2.2@test.com"
+  }]
+}
+
+PUT test/_doc/4
+{
+  "name": "docs4",
+  "groupId": "1",
+  "people":[{
+    "email":"people4.1@test.com"
+  },
+  {
+    "email":"people4.2@test.com"
+  }]
+}
+
+PUT test/_doc/5
+{
+  "name": "docs5",
+  "groupId": "3",
+  "people":[{
+    "email":"people5.1@test.com"
+  },
+  {
+    "email":"people5.2@test.com"
+  }]
+}
+
+
+
+
+
+
+
+GET test/_search
+{
+  "size": 0,
+  "aggs": {
+    "groups": {
+      "terms": {
+        "field": "groupId"
+      },
+      "aggs": {
+        "peoples": {
+          "nested": {
+            "path": "people"
+          },
+          "aggs": {
+            "emails": {
+              "terms": {
+                "field": "people.email",
+                "size": 2
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
