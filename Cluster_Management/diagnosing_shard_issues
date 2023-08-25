@@ -1,0 +1,163 @@
+GET _cat/indices?v
+
+# show the status of active nodes. unactive nodes does not show up.
+GET _cat/nodes?v
+
+
+# below index creation creates as primary 1 and replica 1
+PUT diagnostic
+GET diagnostic
+
+
+# by checking , you will observe  1 UNASSIGNED replica shard
+GET _cat/shards/diagnostic?v
+
+# it will explaination for yellow health status i.e., UNASSIGNED shard reason
+GET _cluster/allocation/explain
+{
+  "index": "diagnostic",
+  "shard": 0,
+  "primary": false
+}
+
+# by updating the index replica shards to 0 , status turns to green
+PUT diagnostic/_settings
+{
+  "number_of_replicas": 0
+}
+
+
+
+
+
+## Activating NODE3 from terminal
+#login to node cluster: ssh username@public_ip_address
+# enter password for public ip address
+
+# Check status of the node, ask's password - enter private ip address password
+$ sudo systemctl status elasticsearch
+
+# and then restart if it's inactive
+$ sudo systemctl start elasticsearch
+
+
+##Check node 3 appeared in the cluster or not using
+GET _cat/nodes?v
+
+
+
+
+
+
+
+
+/*
+Troubleshoot and Repair the accounts Indices
+
+From the Kibana console on the es1 node, use the cluster allocation explain API to troubleshoot and then repair the accounts-1 and accounts-2 indices.
+
+/*
+
+
+GET _cat/shards/accounts-1?v
+GET _cat/shards/accounts-2?v
+
+
+GET _cluster/allocation/explain
+
+
+GET _cat/indices/accounts-1?v
+
+
+GET _cat/indices/accounts-2?v
+
+
+
+POST accounts-1/_close
+POST accounts-1/_open
+
+POST /accounts-1/_forcemerge?max_num_segments=5
+
+PUT accounts-1/_settings
+{
+    "index": {
+      
+        "number_of_replicas": 2
+      
+    }
+    
+}
+
+
+
+PUT accounts-2/_settings
+{
+
+  "number_of_replicas": 0
+
+}
+
+
+GET _cluster/allocation/explain
+{
+  "index": "accounts-1",
+  "shard": 0,
+  "primary": false
+}
+
+
+
+
+
+
+
+
+/**
+
+Reconfigure the accounts Indices to Avoid Repeated Failure
+
+From the Kibana console on the es1 node, configure the accounts-1 and accounts-2 indices in such a way as to maximize redundancy and reliability.
+**/
+
+
+# accounts-2 index having 3 primary and 0 replica shards --  this is bad and not reliable. So changing to 2 replica shards
+
+PUT accounts-2/_settings
+{ 
+  "number_of_replicas": 2
+}
+
+
+# above setting will lead to yellow status of index. check through
+GET _cat/indices/accounts-2?v
+GET _cat/shards/accounts-2?v
+
+# Then check on anyone shard num for reason
+GET _cluster/allocation/explain
+{
+  "index": "accounts-2",
+  "shard": 0,
+  "primary": false
+}
+
+## you will find one of the reason
+/*  "explanation" : """node does not match index setting [index.routing.allocation.require] filters [_name:"es3"]"""   */
+
+# then make below change to turn index status to green
+
+PUT accounts-2/_settings
+{
+  "number_of_replicas": 2,
+  "index.routing.allocation.require._name": null
+}
+
+# Done that's it
+
+
+
+
+
+
+
+
+

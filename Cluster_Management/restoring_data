@@ -1,0 +1,8 @@
+
+
+POST _snapshot/snapshot_repository/backup_1/_restore
+{
+  "indices": "earthquakes",
+  "rename_pattern": "(.+)",    ### when you want to restore all indices this regex renaming pattern will be very useful. this renaming will be in groups ($1, $2......multi scenario)
+  "rename_replacement": "$1_restored"      ## $1 will be replaced with renamed index name 
+}

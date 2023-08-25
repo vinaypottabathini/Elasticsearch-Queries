@@ -1,0 +1,128 @@
+
+GET _cat/nodes?v
+GET _cat/indices?v
+
+
+PUT sample-1
+{
+  "settings":{
+    "number_of_shards": 3,
+    "number_of_replicas": 0
+  }
+}
+
+GET _cat/shards/sample-1?v
+
+
+PUT sample-1/settings
+{
+  "index.routing.allocation.exclude._name": "data-2, data-3"
+}
+
+GET sample-1/settings
+
+# back to normal
+PUT sample-1/settings
+{
+  "index.routing.allocation.exclude._name": null
+}
+
+
+
+## Cluster level allocation
+PUT _cluster/settings
+{
+  "transient":{
+    "cluster.routing.allocation.exclude._name": "data-2, data-3"
+  }
+}
+
+
+# reset back
+PUT _cluster/settings
+{
+  "transient":{
+    "cluster.routing.allocation.exclude._name": null
+  }
+}
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+
+## Example
+## ignore the restarting way of server
+
+Configure nodes data-1 and data-2 to have a "temp" node attribute of "hot".
+
+Using the Secure Shell (SSH), log in to the data-1 and data-2 nodes as cloud_user via the public IP address.
+
+Become the elastic user with:
+
+sudo su - elastic
+In the /home/elastic/elasticsearch/config/elasticsearch.yml file, change the following line:
+
+#node.attr.rack: r1
+to
+
+node.attr.temp: hot
+Restart the elasticsearch node with:
+
+pkill -F /home/elastic/elasticsearch/pid
+/home/elastic/elasticsearch/bin/elasticsearch -d -p pid
+
+Configure nodes data-3 and data-4 to have a "temp" node attribute of "warm".
+
+Using the Secure Shell (SSH), log in to the data-3 and data-4 nodes as cloud_user via the public IP address.
+
+Become the elastic user with:
+
+sudo su - elastic
+In the /home/elastic/elasticsearch/config/elasticsearch.yml file, change the following line:
+
+#node.attr.rack: r1
+to
+
+node.attr.temp: warm
+Restart the elasticsearch node with:
+
+pkill -F /home/elastic/elasticsearch/pid
+/home/elastic/elasticsearch/bin/elasticsearch -d -p pid
+
+Allocate the logs-03 index to the hot nodes.
+
+Use the Kibana console tool to execute the following:
+
+PUT logs-03/_settings
+{
+  "index.routing.allocation.require.temp": "hot"
+}
+
+Allocate the logs-02 index to the warm nodes.
+
+Use the Kibana console tool to execute the following:
+
+PUT logs-02/_settings
+{
+  "index.routing.allocation.require.temp": "warm"
+}
+
+Allocate the logs-01 index to the warm nodes.
+
+Use the Kibana console tool to execute the following:
+
+PUT logs-01/_settings
+{
+  "index.routing.allocation.require.temp": "warm"
+}
+
+
+
+
+##### Update
+Correct way of restarting
+
+elasticsearch$ pkill -F pid
+elasticsearch$ ./bin/elasticsearch -d -p pid
+
+
+

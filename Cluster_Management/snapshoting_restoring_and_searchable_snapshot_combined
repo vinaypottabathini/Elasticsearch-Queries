@@ -1,0 +1,121 @@
+
+/*
+Create the accounts Snapshot Repository
+
+From the Kibana console, create a new filesystem-type snapshot repository called accounts for the filesystem location /mnt/backups/accounts.
+*/
+
+PUT _snapshot/accounts
+{
+  "type": "fs",
+  "settings": {
+    "location": "/mnt/backups/accounts"
+  }
+}
+
+
+
+
+/*
+
+Create the accounts_test_backup Snapshot of the accounts Index
+
+From the Kibana console, create the accounts_test_backup snapshot of the accounts index including the global state.
+
+*/
+
+PUT /_snapshot/accounts/accounts_test_backup
+{
+  "indices": "accounts",
+  "include_global_state": true
+  
+}
+
+
+
+/*
+
+Restore the accounts Index from the accounts_test_backup Snapshot
+
+From the Kibana console, restore the accounts index from the accounts_test_backup snapshot as the index accounts_test_restore.
+
+*/
+
+POST _snapshot/accounts/accounts_test_backup/_restore
+{
+  "indices": "accounts",
+  "rename_pattern": "(.+)", 
+  "rename_replacement": "$1_test_restore"
+}
+
+
+
+/*
+
+Mount the accounts Index from the accounts_test_backup Snapshot
+
+From the Kibana console, mount the accounts index from the accounts_test_backup snapshot as the index accounts_text_backup so that it becomes a searchable snapshot.
+
+*/
+
+
+POST /_snapshot/accounts/accounts_test_backup/_mount
+{
+  "index": "accounts", 
+  "renamed_index": "accounts_test_backup"
+  
+}
+
+
+
+
+
+GET _cat/indices?v
+
+
+############### Example below with bank index ###################
+# path permissions 
+chown elasticsearch:elasticsearch /home/repo_path
+
+
+PUT _snapshot/my_repo
+{
+  "type": "fs",
+  "settings": {
+      "location": "/home/repo_path"
+  }
+}
+
+
+PUT _snapshot/my_repo/bank-1?wait_for_completion=true
+{
+  "indices": "bank"
+}
+
+
+DELETE bank
+
+
+POST _snapshot/my_repo/bank-1/_restore
+{
+  "indices": "bank"
+}
+
+
+----
+
+PUT _snapshot/my_repo/bank-1?wait_for_completion=true
+{
+  "indices": "accounts-*"
+}
+
+
+POST _snapshot/my_repo/bank-1/_restore
+{
+  "indices": "accounts-*",
+  "rename_pattern": "(.+)",
+  "rename_replacement": "$1_restored"
+}
+
+
+

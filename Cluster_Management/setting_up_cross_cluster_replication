@@ -1,0 +1,33 @@
+
+
+# setting up cluster connection
+PUT _cluster/settings
+{
+  "persistent": {
+    "cluster":{
+        "remote":{
+            "leader":{                                #remote cluster name
+                "seeds": "private_ip_address:9300"   #9300 is transport port number
+              }
+          }
+    }
+  }
+}
+
+# Creating Follower Index
+PUT shakespeare/_ccr/follow
+{
+  "remote_cluster": "leader",
+  "leader_index": "shakespeare"
+  
+}
+
+
+# Creating Auto Follow Policy -- that creates follower indices automatically based on name pattern of indices
+PUT _ccr/auto_follow/shakespeare
+{
+  "remote_cluster": "leader",
+  "leader_index_patterns": ["shakespeare-*"]
+}
+
+

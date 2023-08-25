@@ -1,0 +1,84 @@
+
+## Ignore the way of restarting server that's old version.
+
+
+Configure nodes data-1 and data-2 to have a "zone" node attribute with a value of "1".
+
+Using the Secure Shell (SSH), log in to the data-1 and data-2 nodes as cloud_user via the public IP address.
+
+Become the elastic user with:
+
+sudo su - elastic
+In the /home/elastic/elasticsearch/config/elasticsearch.yml file, change the following line:
+
+#node.attr.rack: r1
+to
+
+node.attr.zone: 1
+Restart the elasticsearch node with:
+
+pkill -F /home/elastic/elasticsearch/pid
+/home/elastic/elasticsearch/bin/elasticsearch -d -p pid
+
+Configure nodes data-3 and data-4 to have a "zone" node attribute with a value of "2".
+
+Using the Secure Shell (SSH), log in to the data-3 and data-4 nodes as cloud_user via the public IP address.
+
+Become the elastic user with:
+
+sudo su - elastic
+In the /home/elastic/elasticsearch/config/elasticsearch.yml file, change the following line:
+
+#node.attr.rack: r1
+to
+
+node.attr.zone: 2
+Restart the elasticsearch node with:
+
+pkill -F /home/elastic/elasticsearch/pid
+/home/elastic/elasticsearch/bin/elasticsearch -d -p pid
+
+Enable shard allocation awareness for the cluster per instructions.
+
+Use the Kibana console tool to execute the following:
+
+PUT _cluster/settings
+{
+  "persistent": {
+    "cluster.routing.allocation.awareness.attributes": "zone",
+    "cluster.routing.allocation.awareness.force.zone.values": "1,2"
+  }
+}
+
+Stop Elasticsearch on nodes data-3 and data-4.
+
+Using the Secure Shell (SSH), log in to the data-3 and data-4 nodes as cloud_user via the public IP address.
+
+Become the elastic user with:
+
+sudo su - elastic
+Stop the elasticsearch node with:
+
+pkill -F /home/elastic/elasticsearch/pid
+
+Ensure that all primary shards are assigned and all replica shards remain unassigned.
+
+Use the Kibana console tool to execute the following:
+
+GET _cat/shards?v
+
+
+
+
+
+
+
+
+##### Update
+Correct way of restarting
+
+elasticsearch$ pkill -F pid
+elasticsearch$ ./bin/elasticsearch -d -p pid
+
+
+

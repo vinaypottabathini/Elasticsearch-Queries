@@ -1,0 +1,86 @@
+
+#Creating Snapshot Repository
+PUT _snapshot/snapshot_repository
+{
+    "type": "fs",
+    "settings": {
+       "location": "/mnt/backups"
+    }
+}
+
+#Terimnal
+$ ssh username@public_ip_address
+$ enter public ip address password
+
+# Go to Root
+$ sudo su -
+$ enter private ip adress password
+
+# Create directory path
+$ mkdir /mnt/backups
+
+# Change permissions for directory
+$ chown elasticsearch:elasticsearch /mnt/backups
+
+#Check permission status
+$ ll -d /mnt/backups/
+
+
+# edit elasticsearch.yml file
+$ vim /etc/elasticsearch/elasticsearch.yml
+
+# Go to Paths Section and add
+## Path to Snapshot repository
+path.repo : /mnt/backups
+
+#save the file
+
+# Restart the elasticsearch
+$ systemctl restart elasticsearch
+
+
+# Console
+# Rerun below query - repository will be created
+PUT _snapshot/snapshot_repository
+{
+    "type": "fs",
+    "settings": {
+       "location": "/mnt/backups"
+    }
+}
+
+
+# Now Create a Snapshot
+PUT _snapshot/snapshot_repository/backup_1
+{
+  "indices" : "*",
+  "include_global_state": true
+}
+
+# Check snapshot
+GET _snapshot/snapshot_repository/backup_1
+
+
+
+# Now Create SLM Policy to create snapshot everyday
+PUT _slm/policy/daily_snapshot
+{
+    "schedule": "0 0 1 * * ?",   #'sec min hour day month dayofweek',   ? - everydayofweek  
+    "name": "<daily_snapshot_{now/d}>",
+    "repository": "snapshot_repository",
+    "config" :{
+          "indices" : "*",
+          "include_global_state": true
+      },
+    "retention": {
+        "expire_after": "30d",
+        "min_count" : 7,
+        "max_count": 30
+      }
+      
+  }
+      
+    
+
+
+

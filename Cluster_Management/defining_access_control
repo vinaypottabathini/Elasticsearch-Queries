@@ -1,0 +1,110 @@
+
+
+GET ecommerce/_search
+
+
+POST _security/role/products_read
+{
+  "cluster": [],
+  "indices": [
+  {
+      "name": ["ecommerce"],
+      "privileges": ["read"],
+      "field_security": {
+          "grant": ["products.*"]
+       },
+       "query":{
+          "term":{
+              "geoip.continent_name":{
+                    "value": "North America"
+            }
+          }
+  }
+ ]
+}
+ 
+
+POST _security/user/vinay
+{
+  "full_name": "vinay pottabathini",
+  "email": "vinay4998@gmail.com",
+  "password": "apOTREGh",
+  "roles": ["products_read", "kibana_user"]
+}
+ 
+ 
+ 
+ 
+ 
+ 
+----------------
+
+
+/*
+
+Create the account_holders_read Role
+
+From the Kibana console, create the account_holders_read role with the following restrictions:
+
+Only has read access to the accounts index.
+Only has access to the documents where mail_opt_out is false.
+Only has access to the firstname, lastname, and email fields.
+
+
+*/
+
+
+POST _security/role/account_holders_read
+{
+  "cluster": [],
+  "indices": [
+    {
+      "names": ["accounts"],
+      "privileges": ["read"],
+      "field_security": {
+        "grant": ["firstname", "lastname", "email"]
+      },
+      "query": {
+        "term": {
+          "mail_opt_out": {
+            "value": false
+          }
+        }
+      }
+      
+    }
+  ]
+}
+
+
+/*
+
+
+Create the accounts_mailer User
+
+From the Kibana console, create the accounts_mailer user with the following information:
+
+Full Name: Accounts Mailer
+Email: accounts_mailer@company.com
+Password: yUqS54J9d6nx
+Roles: account_holders_read
+
+
+*/
+
+
+
+GET _security/user/accounts_mailer
+POST _security/user/accounts_mailer
+{
+  "full_name": "Accounts Mailer",
+  "email": "accounts_mailer@company.com",
+  "password": "yUqS54J9d6nx",
+  "roles": ["account_holders_read"]
+}
+ 
+ 
+ 
+ 
+ 
+ 

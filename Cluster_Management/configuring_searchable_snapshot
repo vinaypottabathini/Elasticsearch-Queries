@@ -1,0 +1,31 @@
+# 2 ways - Can be configured through index lifecycle management(ILM) automatically or the mount API manually
+
+
+
+# Enable the trial licence to work the above
+POST _licence/start_trial?acknowledge=true    #this is 30 days free trial licence
+
+# check for 'earthquakes_searchable_snapshot_index' in list of indices
+GET _cat/indices?v
+
+# this is not an index in the cluster . it's a snapshot on the filesystem that is mounted to be searchable
+
+--
+# Now let's create searchable snapshot through ilm policy
+PUT _ilm/policy/my-policy
+{
+  "policy": {
+     "phases": {
+          "cold": {
+              "actions": {
+                    "searchable_snapshot":{
+                        "snapshot_repository": "my_repository" 
+                        }
+                  }
+             }
+      }
+  }
+}
+
+
+#
