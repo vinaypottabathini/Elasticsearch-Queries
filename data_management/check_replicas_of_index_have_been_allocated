@@ -1,0 +1,2 @@
+#Check that the replicas of indices `hamlet-1` and `hamlet-2` have  been allocated 
+GET /_cat/shards/hamlet-1,hamlet-2?h=index,shard,prirep,state,unassigned.reason
