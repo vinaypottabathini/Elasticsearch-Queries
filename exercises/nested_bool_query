@@ -1,0 +1,27 @@
+ ## write a single search query with following requirements satisfied. on index ket query on the name field that contains either 'me' or 'my' and match the word 'kong' on title field which scored higher
+
+
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "bool": {
+            "should": [
+              { "match": { "name": "me" } },
+              { "match": { "name": "my" } }
+            ]
+          }
+        },
+        {
+          "match": {
+            "title": {
+              "query": "kong",
+              "boost": 2
+            }
+          }
+        }
+      ]
+    }
+  }
+}

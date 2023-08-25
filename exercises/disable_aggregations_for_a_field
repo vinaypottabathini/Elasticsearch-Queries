@@ -1,0 +1,12 @@
+#disable aggregations on a specific field in Elasticsearch
+
+
+PUT your_index/_mapping
+{
+  "properties": {
+    "your_field": {
+      "type": "text",
+      "doc_values": false
+    }
+  }
+}

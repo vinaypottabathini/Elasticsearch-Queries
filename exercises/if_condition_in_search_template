@@ -1,0 +1,52 @@
+
+
+
+# Update the "with_response_and_tag" search template, so that (i) if the "with_max_response" parameter is not set, then don't set an upper bound to the `response` value, and (ii) if the "with_tag" parameter is not set, then do not apply that second filter at all
+
+
+PUT _scripts/with_response_and_tag
+{
+  "script": {
+    "lang": "mustache",
+    "source": """
+    {
+      "query": {
+        "bool": {
+          "must": [
+            {
+              "range": {
+                "response": {
+                  "gte": "{{with_min_response}}"
+                  {{#with_max_response}},
+                  "lte": "{{with_max_response}}"
+                  {{/with_max_response}}
+                }
+              }
+            }
+            {{#with_tag}},
+            {
+              "term": {
+                "tags": "{{with_tag}}"
+              }
+            }
+            {{/with_tag}}
+          ]
+        }
+      }
+    }
+    """
+  }
+}
+
+
+
+POST kibana_sample_data_logs/_search/template
+{
+  "id": "with_response_and_tag",
+  "params": {
+    "with_min_response": 400
+    
+    
+  }
+}
+

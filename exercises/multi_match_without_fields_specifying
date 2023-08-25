@@ -1,0 +1,41 @@
+POST test/_doc
+{
+    "id": 1,
+    "serviceDescription": "a bunch of text",
+    "serviceTitle": "title",
+    "serviceTags":["tag1","tag2"],
+    "type":"service"
+}
+
+
+
+POST test/_doc
+{
+    "id": 2,
+    "companyDescription": "a bunch of text more",
+    "companyTitle": "title",
+    "companyTags":["tag1","tag2"],
+    "type":"company"
+}
+  
+
+
+  
+  
+
+GET test/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "multi_match": {
+            "query": "bunch of text"
+          }
+        }
+      ]
+    }
+  }
+}
+  
+  

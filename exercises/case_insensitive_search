@@ -1,0 +1,36 @@
+
+
+PUT /networks?pretty
+{
+  "mappings": {
+    "properties": {
+      "range": { "type": "ip_range" },
+      "name": { "type": "keyword" },
+      "department": { "type": "keyword" }
+    }
+  }
+}
+
+
+PUT /networks/_doc/1?refresh=wait_for&pretty
+{
+  "range": "2001:db8::/48",
+  "name": "PRODUCTION",
+  "department": "OPS"
+}
+
+
+
+
+
+GET /networks/_search
+{
+  "query": {
+    "term": {
+      "name": {
+        "value": "production",
+        "case_insensitive": true
+      }
+    }
+  }
+}
