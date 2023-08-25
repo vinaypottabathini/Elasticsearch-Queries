@@ -1,0 +1,38 @@
+REINDEX WHITELISTING for one node cluster to another node cluster
+
+
+$ssh username@public_ip_address
+
+it will ask to create new password after successful login
+
+Go to Root
+$sudo su -
+#and enter the newly created password
+
+#then change directory to elasticsearch
+$ cd /etc/elasticsearch
+
+#next open elasticsearch.yml file
+$ vi elasticsearch.yml
+
+
+# go to 'Various' section and add variable as below
+reindex.remote.whitelist : "private_ip_address:9200"
+
+# if multiple ip addresses
+reindex.remote.whitelist : "private_ip_address_1:9200,private_ip_address_2:9200"
+
+Now save the file 
+shift+:wq!
+
+#restart the elasticsearch
+1way: $ systemctl restart elasticsearch
+
+old_system_way: $ service elasticsearch restart
+
+running this from command line and you didn't installed as package: $ /path/to/bin/elasticsearch -d
+
+# check the dev tools by searching....done!
+
+
+

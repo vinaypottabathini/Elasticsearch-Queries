@@ -1,0 +1,29 @@
+/*
+Fix the Typo for the King Lear Play
+
+From the Kibana console on the es1 node, update the shakespeare index to fix the misspelled "King Leer" play_name to "King Lear".
+*/
+
+
+GET shakespeare/_search
+{
+  "query": {
+    "term": {
+      "play_name.keyword": "King Lear"
+    }
+  }
+}
+
+POST shakespeare/_update_by_query
+{
+  "query": {
+    "term": {
+      "play_name.keyword": "King Leer"
+    }
+  },
+  "script": {
+    "source": "ctx._source.play_name='King Lear'",
+    "lang": "painless"
+  }
+}
+

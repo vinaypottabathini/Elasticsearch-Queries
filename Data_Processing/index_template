@@ -1,0 +1,46 @@
+
+
+/*
+
+Create the twitter_template Index Template
+
+From the Kibana console, create the twitter_template index template with the following requirements:
+
+Matches all indices that start with "twitter-".
+Composed of the strings_as_keywords and social_media_analyzer component templates.
+Maps the tweet field as an analyzed string field with the social_media analyzer.
+Maps a tweet.keyword multi-field as type keyword and only indexes the first 280 characters.
+Sets the number of shards to 1 and replicas to 0.
+
+
+*/
+
+
+PUT _index_template/twitter_template
+{
+  "index_patterns": ["twitter-*"],
+  "composed_of": ["strings_as_keywords", "social_media_analyzer"],
+  "template":{
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings":{
+      "properties":{
+        "tweet":{
+          "type": "text",
+          "analyzer": "social_media",
+          "fields": {
+            "keyword":{
+              "type": "keyword",
+              "ignore_above": 280
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+

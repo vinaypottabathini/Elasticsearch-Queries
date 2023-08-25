@@ -1,0 +1,33 @@
+
+
+/*
+Create the strings_as_keywords Component Template
+
+From the Kibana console, create the strings_as_keywords component template with the following requirements:
+
+Dynamically maps string fields as the keyword datatype.
+Only indexes the first 256 characters.
+
+*/
+
+
+PUT _component_template/strings_as_keywords
+{
+  "template": {
+    "mappings": {
+        "dynamic_templates":[
+          {
+            "strings_as_keywords":{
+              "match_mapping_type": "string",
+              "mapping":{
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+            
+          }
+          
+          ]
+    }
+  }
+}
