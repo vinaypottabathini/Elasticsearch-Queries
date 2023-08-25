@@ -1,0 +1,15 @@
+GET _cat
+GET _cat/nodes?v
+
+GET _cat/indices?v
+
+GET _cat/master?v
+GET _cat/master?h=host,node&v
+
+
+GET _cat/health?v
+GET _cat/health?help
+GET _cat/health?format=json
+GET _cat/health?format=yaml
+
+
