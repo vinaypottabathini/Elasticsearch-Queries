@@ -1,0 +1,27 @@
+# connect to root
+$ sudo su -
+
+# open kibana.yml file 
+$ /etc/kibana/kibana.yml
+
+
+# 2 Configurations
+
+# first- server.port. By default, we have 5601. This is not going to be directly accessible through the firewall of our cloud playground. use as a port that is accessible and the appropriate port for non-encrypted traffic, 8080.
+server.port : 8080
+
+
+# second- server.host defaults to 'localhost', we need to change this if we're going to be able to remotely access our Kibana instance from our local web browser. private IP address of the master-1 node.
+server.host : "private_ip_address_of_master_1_node"
+
+# close the file
+
+
+# start the kibana
+$ systemctl start kibana
+
+
+# check the logs of kibana. Actually it can find logs of kibana as below
+$ less /var/log/messages
+
+# thats it done!

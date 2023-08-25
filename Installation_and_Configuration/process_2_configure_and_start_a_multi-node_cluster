@@ -1,0 +1,158 @@
+# we have Elasticsearch downloaded and deployed to all 3 of our nodes in Process 1. Now let's go ahead and configure it as per architecture structure diagram to form this 3-node cluster.
+
+# we can find all of the configurations for Elasticsearch whenever we deploy using RPM in /etc/elasticsearch.
+$ cd /etc/elasticsearch
+
+# list this directory
+$ ll
+
+# We see that we have the Elasticsearch key store for storing secrets and passphrases that sort of thing for Elasticsearch. we'll use that in the security section when we need to store the passphrase for our certificates.
+# The elasticsearch.yml is the primary configuration file for our Elasticsearch cluster.
+# Jvm.options is to configure the various aspects of the JVM. we'll use that to configure the Elasticsearch heap on our master-1 node.
+# Log4j2 properties, we're not going to really touch. That's just to change the way Elasticsearch logs.
+# the final 4 files here for roles and users is all about mapping and creating users and roles in the user access control for the security plug in of Elasticsearch
+
+
+# Lets go ahead and configure our cluster.
+# Open elasticsearch.yml file.
+$ vim /etc/elasticsearch/elasticsearch.yml
+
+# Cluster Section
+##Configurations
+# Cluster name. (cluster name is going to be same for all 3 nodes)
+cluster.name : my_cluster
+
+
+# Node Section
+# Node name 
+
+#NODE-1(master)
+node.name : master-1
+
+#NODE-2(data)
+node.name : data-1
+
+# for data node add custom attributes, key-value pairs that you can attach to a node, and you can use those attributes later on to make decisions on routing, or various aspects of how you allocate your data and how you recover your data from Elasticsearch.
+# So, we're going to have a temperature attribute on data-1 and data-2. One's going to be hot. The other's going to be warm. But, for the master-1 node, we don't need any custom attributes
+## If in case it's multi cluster setup here you can set the zone like ----> node.attr.zone: 1 (or 2 or 3)
+# change already commented --- node.attr.rack  --> node.attr.temp or write new variable
+node.attr.temp : hot
+
+#NODE-3(data)
+node.name : data-2
+node.attr.temp : warm
+
+
+# Network
+# By default, the network.host here is going to bind to all of the localhost addresses. In order for the other nodes to actually see
+# and discover each other, we do need to bind to a site-local address.
+# little shortcut here is to use the special value _local_ and _site_. (same for all nodes)
+network.host : [_local_, _site_]
+ 
+
+# Discovery
+# there's 2 values we have to set down here.
+# One is the discovery.seed_hosts. this is essentially a list of IP addresses that when this node starts up, it's going to reach out to those IP addresses. It's going to ask, "Hey, are you the master node? "And, if you're not, who is the master node?" That way, this node can get directed to whoever the master is. put the private IP address of the master-1 node here.
+# you can add multiple private ip address of master nodes , itself or other master nodes private ip addresses (same for all nodes)
+discovery.seed_hosts : ["private_ip_address_of_master_node"]
+
+# The other is the cluster.initial_master_nodes.
+# this is very simply just a list of all of your master eligible node names.
+# Now, the reason we need this is whenever we're bootstrapping a brand new cluster, we need each node to have some foreknowledge of how many master nodes there are and what their node names are. That way, we don't accidentally join another cluster that may exist in the same subnet. So, this is a very important security and efficacy setting that we need here in order to make sure that we bootstrap our cluster properly and only join the cluster that we intend to.
+# same for all nodes
+cluster.initial_master_nodes : ["master-1"]
+
+
+
+# Various Section
+# we're going to add some configuration items like list out all of the node roles and essentially just define the roles of this host.
+# in case if you have only one master node then set all roles to true. 
+
+#NODE-1
+node.master: true
+node.data: false
+node.ingest: true
+node.ml: false  # (ml-machine learning)
+
+
+#NODE-2
+node.master: false
+node.data: true
+node.ingest: false
+node.ml: false 
+
+#NODE-3
+node.master: false
+node.data: true
+node.ingest: false
+node.ml: false 
+
+# save and close 3 node's elasticsearch.yml files
+
+
+# jvm.options file
+# So, there's one more thing we have to configure and that's going to be the jvm heap for these nodes.
+# So One gig is the default heap, so we're just going to leave data-1 and data-2 those nodes alone.
+# However, our master node needs slightly less memory so that we have more memory available for Kibana.
+# Now, the reason we're doing this is because the memory use requirements are much higher for data in machine learning nodes. Master nodes, or coordinating-only nodes, 
+# they barely need that much memory. So, much lower memory requirements here. Therefore, we're going to go ahead and de-allocate some memory from Elasticsearch. 
+# That way we have more available to this system and also to Kibana, which will be on this master-1 node.
+
+# open file 
+$ vim /etc/elasticsearch/jvm.options
+
+# in this file the very first option we have here is min and the max heap.
+# So, let's go ahead and change this from the default 1 gig to 768 megabytes, like so.
+# And, we're always going to set the min and the max heap for Elasticsearch to be the same value, because there's no point in garbage collecting down to some lower bound.
+
+# Change in master node only
+-Xms1g -----> -Xms768m
+-Xmx1g -----> -Xms768m
+
+# save and close the file.
+
+# That should be all of the configuration that we need.
+
+# start the elasticsearch for all nodes
+$ systemctl start elasticsearch
+
+
+
+# We can check the logs as it starts up to make sure that we don't have any typos anywhere. If we do, we'll go ahead and figure those out and fix them as we need to.
+$ less /var/log/elasticsearch/my_cluster.log                       # my_cluster is name of the cluster
+
+# check vaguely
+[master-1] started
+[master-1] licence
+[master-1] added {{data-1}......
+[master-1] added {{data-2}......
+
+# above lines means that these nodes properly found each other. Our discovery seed host was configured correctly. 
+# close the log file
+
+
+# As we're binding to both local host and site-local addresses, let's hit localhost:9200 without any path so we can just see the default root path for Elasticsearch is just going to give us some basic version information.
+$ curl localhost:9200
+
+# This just let's us know that Elasticsearch is up and running, and it's receiving HTTP requests.
+
+# next the best way to get information through the APIs, especially when you're in a terminal interface like this, is to use what's called the cat APIs.
+$ curl localhost:9200/_cat                              # will list of all the cat APIs available to us
+
+
+# for nodes infomation
+$ curl localhost:9200/_cat/nodes?v 
+
+
+# for health infomation
+$ curl localhost:9200/_cat/health?v 
+
+
+
+# Done
+
+
+
+
+
+

@@ -1,0 +1,33 @@
+# This is the example with 3 servers (nodes) - 1 master node and 2 data nodes
+
+## TERMINAL
+# make the same configurations in terminal for 3 servers
+
+
+# Connect to root
+$ sudo su -
+
+# and enter private ip address password for connecting to root
+
+# Next Download and import the GPG Key which is used to validate all the RPMs that we're going to be using to install Elasticsearch in Kibana.
+
+# RPM Command
+$ rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
+
+
+# now have the GPG key imported on all 3 nodes. so let's go ahead and download the Elasticsearch RPM. (Install the required version)
+$ curl -O https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.6.0-x86_64.rpm
+
+
+# let's go ahead and install
+$ rpm --install elasticsearch-7.6.0-x86_64.rpm
+
+
+# next enable the elasticsearch
+# what this does is it's going to create a SIM link that basically starts Elasticsearch up on the system boot. So this is not entirely mandatory, but 9 times out of 10,
+# if you have a service like Elasticsearch, you're typically going to have like a dedicated server for something like Elasticsearch, because it is so resource intensive.
+# You want stuff like this to start up when a system starts up automatically. So if for any reason, this system were to be restarted or if it were to fail and turn off
+# and you turn it back on again, you want all of the primary services to start up automatically, so that it can rejoin the cluster and go back to a green state as quickly as possible.
+$ systemctl enable elasticsearch
+
+

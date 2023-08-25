@@ -1,0 +1,22 @@
+# Connect to root
+$ sudo su -
+
+
+# Import GPG KEY licence if not imported
+# RPM Command
+$ rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
+
+# Now download kibana
+$ curl -O https://artifacts.elastic.co/downloads/kibana/kibana-7.6.0-x84_64.rpm
+
+# check the file
+$ ll
+
+
+# install kibana
+$ rpm --install kibana-7.6.0-x84_64.rpm
+
+# wait for a while
+
+# once installation is done check the configuration files of kibana
+$ ll /etc/kibana
